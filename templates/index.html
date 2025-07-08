@@ -1,32 +1,138 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="./static/mywebscript.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detector</title>
     <style>
-        .center-heading {
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
             text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            min-height: 50px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .result {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="card-body">
-            <h1 class="center-heading">NLP - Emotion Detection</h1> 
-            <div style="padding: 25px 25px 25px 25px;">
-            <h2 class="mb-3">
-                <label class="form-label">Please enter the text to be analyzed</label>
-                <input type="textarea" class="form-control" id="textToAnalyze">
-            </h2>
-
-            <div style="padding: 25px 25px 25px 25px;">
-                <button onclick="RunSentimentAnalysis()" class="btn btn-secondary">Run Sentiment Analysis</button>
+    <div class="container">
+        <h1>Emotion Detector</h1>
+        
+        <form onsubmit="RunSentimentAnalysis(event)">
+            <div class="form-group">
+                <label for="textToAnalyze">Enter text to analyze:</label>
+                <input type="text" id="textToAnalyze" name="textToAnalyze" 
+                       placeholder="Type your text here..." required>
             </div>
-            <div style="padding: 25px 25px 25px 25px;"></div>
-            <h2 class="mb-3">
-                <label class="form-label">Result of Emotion Detection</label>
-            </h2>
-
-            <div id="system_response" style="padding: 25px 25px 25px 25px;"></div>
-        </div>
+            
+            <button type="submit">Analyze Emotion</button>
+        </form>
+        
+        <div id="output"></div>
     </div>
+
+    <script>
+        function RunSentimentAnalysis(event) {
+            event.preventDefault();
+            
+            const textToAnalyze = document.getElementById('textToAnalyze').value;
+            const outputDiv = document.getElementById('output');
+            
+            if (!textToAnalyze.trim()) {
+                outputDiv.innerHTML = '<p class="error">Please enter some text to analyze.</p>';
+                return;
+            }
+            
+            // Show loading message
+            outputDiv.innerHTML = '<p>Analyzing emotion...</p>';
+            
+            // Make request to emotion detector endpoint
+            fetch(`/emotionDetector?textToAnalyze=${encodeURIComponent(textToAnalyze)}`)
+                .then(response => response.text())
+                .then(data => {
+                    if (data.includes('Invalid text')) {
+                        outputDiv.innerHTML = `<p class="error">${data}</p>`;
+                    } else {
+                        outputDiv.innerHTML = `<p class="result">${data}</p>`;
+                    }
+                })
+                .catch(error => {
+                    outputDiv.innerHTML = '<p class="error">Error analyzing emotion. Please try again.</p>';
+                    console.error('Error:', error);
+                });
+        }
+    </script>
 </body>
+</html>
